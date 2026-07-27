@@ -1,0 +1,95 @@
+// PiCalculator.java
+
+class PiCalculator {
+
+    // private: internal state, hidden from outside classes
+    private double piValue;
+    private int iterations;
+
+    // protected: accessible to this class, subclasses, and same package
+    // (useful if someone wants to extend this class with a different algorithm)
+    protected static final double DEFAULT_TOLERANCE = 1e-9;
+
+    // public: constructor, accessible from anywhere
+    public PiCalculator(int iterations) {
+        this.iterations = iterations;
+        this.piValue = 0.0;
+    }
+
+    // private: internal helper method, implementation detail hidden from users
+    // Uses the Leibniz series: pi/4 = 1 - 1/3 + 1/5 - 1/7 + ...
+    private double leibnizSeries(int terms) {
+        double sum = 0.0;
+        for (int k = 0; k < terms; k++) {
+            double term = 1.0 / (2 * k + 1);
+            sum += (k % 2 == 0) ? term : -term;
+        }
+        return sum * 4;
+    }
+
+    // protected: allows a subclass to override the computation strategy
+    protected double computePi() {
+        return leibnizSeries(iterations);
+    }
+
+    // public: main entry point for external code to trigger computation
+    public void calculate() {
+        this.piValue = computePi();
+    }
+
+    // public: controlled read access to the private field (getter)
+    public double getPiValue() {
+        return piValue;
+    }
+
+    // public: controlled write access with validation (setter)
+    public void setIterations(int iterations) {
+        if (iterations > 0) {
+            this.iterations = iterations;
+        } else {
+            System.out.println("Iterations must be positive.");
+        }
+    }
+
+    public int getIterations() {
+        return iterations;
+    }
+}
+
+// Subclass demonstrating protected member usage
+class HighPrecisionPiCalculator extends PiCalculator {
+
+    public HighPrecisionPiCalculator(int iterations) {
+        super(iterations);
+    }
+
+    // Overriding protected method — only possible because it's protected, not private
+    @Override
+    protected double computePi() {
+        // Uses Nilakantha series for faster convergence:
+        // pi = 3 + 4/(2*3*4) - 4/(4*5*6) + 4/(6*7*8) - ...
+        double pi = 3.0;
+        double sign = 1.0;
+        for (int k = 2; k < getIterations() * 2; k += 2) {
+            pi += sign * (4.0 / (k * (k + 1) * (k + 2)));
+            sign *= -1;
+        }
+        return pi;
+    }
+}
+
+public class PiDemo {
+    public static void main(String[] args) {
+        PiCalculator basic = new PiCalculator(100000);
+        basic.calculate();
+        System.out.println("Leibniz Pi (100000 terms): " + basic.getPiValue());
+
+        HighPrecisionPiCalculator advanced = new HighPrecisionPiCalculator(1000);
+        advanced.calculate();
+        System.out.println("Nilakantha Pi (1000 terms): " + advanced.getPiValue());
+
+        // basic.piValue = 3.14;      // ❌ compile error: piValue is private
+        // basic.leibnizSeries(10);   // ❌ compile error: leibnizSeries is private
+        // basic.computePi();        // ❌ compile error: computePi is protected, not accessible here
+    }
+}
