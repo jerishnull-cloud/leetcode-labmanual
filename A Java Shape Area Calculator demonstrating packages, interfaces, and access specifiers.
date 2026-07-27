@@ -1,0 +1,102 @@
+// ShapeAreaCalculator.java
+// Single-file demo of interfaces + access specifiers in Java
+
+interface Shape {
+    double calculateArea();
+    double calculatePerimeter();
+
+    // default method (Java 8+)
+    default void displayInfo() {
+        System.out.printf("Area: %.2f, Perimeter: %.2f%n", calculateArea(), calculatePerimeter());
+    }
+}
+
+class Circle implements Shape {
+    private double radius; // private: only accessible inside this class
+
+    public Circle(double radius) {
+        this.radius = radius;
+    }
+
+    public double getRadius() {           // public: accessible anywhere
+        return radius;
+    }
+
+    public void setRadius(double radius) {
+        if (radius > 0) this.radius = radius;
+    }
+
+    @Override
+    public double calculateArea() {
+        return Math.PI * radius * radius;
+    }
+
+    @Override
+    public double calculatePerimeter() {
+        return 2 * Math.PI * radius;
+    }
+}
+
+class Rectangle implements Shape {
+    private double length;
+    private double width;
+
+    protected String label = "Rectangle"; // protected: visible to subclasses too
+
+    public Rectangle(double length, double width) {
+        this.length = length;
+        this.width = width;
+    }
+
+    @Override
+    public double calculateArea() {
+        return length * width;
+    }
+
+    @Override
+    public double calculatePerimeter() {
+        return 2 * (length + width);
+    }
+}
+
+class Triangle implements Shape {
+    private double base, height, sideA, sideB, sideC;
+
+    public Triangle(double base, double height, double sideA, double sideB, double sideC) {
+        this.base = base;
+        this.height = height;
+        this.sideA = sideA;
+        this.sideB = sideB;
+        this.sideC = sideC;
+    }
+
+    double rawBase() {       // package-private (default access): no modifier
+        return base;
+    }
+
+    @Override
+    public double calculateArea() {
+        return 0.5 * base * height;
+    }
+
+    @Override
+    public double calculatePerimeter() {
+        return sideA + sideB + sideC;
+    }
+}
+
+public class ShapeAreaCalculator {
+    public static void main(String[] args) {
+        Shape[] shapes = {
+            new Circle(5),
+            new Rectangle(4, 6),
+            new Triangle(6, 4, 5, 5, 6)
+        };
+
+        for (Shape s : shapes) {
+            System.out.println(s.getClass().getSimpleName() + ":");
+            s.displayInfo();
+            System.out.println("-----");
+        }
+    }
+}
