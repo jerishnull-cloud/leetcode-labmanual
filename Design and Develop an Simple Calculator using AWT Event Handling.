@@ -1,0 +1,139 @@
+import java.awt.*;
+import java.awt.event.*;
+
+public class SimpleCalculator extends Frame implements ActionListener {
+
+    private TextField display;
+    private double num1 = 0;
+    private String operator = "";
+    private boolean startNewNumber = true;
+
+    public SimpleCalculator() {
+        setTitle("Simple Calculator - AWT");
+        setSize(320, 420);
+        setLayout(new BorderLayout(5, 5));
+        setResizable(false);
+
+        // Display field
+        display = new TextField();
+        display.setEditable(false);
+        display.setFont(new Font("Arial", Font.BOLD, 24));
+        add(display, BorderLayout.NORTH);
+
+        // Button panel
+        Panel buttonPanel = new Panel();
+        buttonPanel.setLayout(new GridLayout(5, 4, 5, 5));
+
+        String[] buttons = {
+            "7", "8", "9", "/",
+            "4", "5", "6", "*",
+            "1", "2", "3", "-",
+            "0", ".", "=", "+",
+            "C", "CE", "%", "±"
+        };
+
+        for (String label : buttons) {
+            Button btn = new Button(label);
+            btn.setFont(new Font("Arial", Font.PLAIN, 18));
+            btn.addActionListener(this);   // register event listener
+            buttonPanel.add(btn);
+        }
+
+        add(buttonPanel, BorderLayout.CENTER);
+
+        // Window close event
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                dispose();
+                System.exit(0);
+            }
+        });
+
+        setVisible(true);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        String command = e.getActionCommand();
+
+        try {
+            switch (command) {
+                case "0": case "1": case "2": case "3": case "4":
+                case "5": case "6": case "7": case "8": case "9": case ".":
+                    if (startNewNumber) {
+                        display.setText(command);
+                        startNewNumber = false;
+                    } else {
+                        display.setText(display.getText() + command);
+                    }
+                    break;
+
+                case "+": case "-": case "*": case "/":
+                    num1 = Double.parseDouble(display.getText());
+                    operator = command;
+                    startNewNumber = true;
+                    break;
+
+                case "=":
+                    double num2 = Double.parseDouble(display.getText());
+                    double result = calculate(num1, num2, operator);
+                    display.setText(formatResult(result));
+                    startNewNumber = true;
+                    break;
+
+                case "C":
+                    display.setText("");
+                    num1 = 0;
+                    operator = "";
+                    startNewNumber = true;
+                    break;
+
+                case "CE":
+                    display.setText("");
+                    startNewNumber = true;
+                    break;
+
+                case "±":
+                    if (!display.getText().isEmpty()) {
+                        double value = Double.parseDouble(display.getText());
+                        display.setText(formatResult(-value));
+                    }
+                    break;
+
+                case "%":
+                    if (!display.getText().isEmpty()) {
+                        double value = Double.parseDouble(display.getText());
+                        display.setText(formatResult(value / 100));
+                    }
+                    break;
+            }
+        } catch (Exception ex) {
+            display.setText("Error");
+            startNewNumber = true;
+        }
+    }
+
+    private double calculate(double a, double b, String op) {
+        switch (op) {
+            case "+": return a + b;
+            case "-": return a - b;
+            case "*": return a * b;
+            case "/":
+                if (b == 0) throw new ArithmeticException("Divide by zero");
+                return a / b;
+            default: return b;
+        }
+    }
+
+    private String formatResult(double result) {
+        if (result == (long) result) {
+            return String.valueOf((long) result);
+        }
+        return String.valueOf(result);
+    }
+
+    public static void main(String[] args) {
+        new SimpleCalculator();
+    }
+}
